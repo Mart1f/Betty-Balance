@@ -19,20 +19,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _touchedPieIdx = -1;
 
   static const Map<String, Color> _catColors = {
-    'Nómina': Color(0xFF8BC34A),
-    'Alquiler': Color(0xFFE65100),
-    'Universidad': Color(0xFF1A237E),
-    'Personas': Color(0xFF00695C),
-    'Supermercado': Color(0xFF4CAF50),
-    'Restaurantes': Color(0xFFFF9800),
-    'Transporte': Color(0xFF2196F3),
-    'Salud': Color(0xFFE91E63),
-    'Ocio': Color(0xFF9C27B0),
-    'Viajes': Color(0xFF00BCD4),
-    'Suscripciones': Color(0xFF607D8B),
-    'Ropa': Color(0xFFFF5722),
-    'Transferencias': Color(0xFF795548),
-    'Otros': Color(0xFF9E9E9E),
+    'Salary': Color(0xFF8BC34A),
+    'Rent': Color(0xFFE65100),
+    'University': Color(0xFF1A237E),
+    'People': Color(0xFF00695C),
+    'Groceries': Color(0xFF4CAF50),
+    'Restaurants': Color(0xFFFF9800),
+    'Transport': Color(0xFF2196F3),
+    'Health': Color(0xFFE91E63),
+    'Entertainment': Color(0xFF9C27B0),
+    'Travel': Color(0xFF00BCD4),
+    'Subscriptions': Color(0xFF607D8B),
+    'Clothing': Color(0xFFFF5722),
+    'Transfers': Color(0xFF795548),
+    'Others': Color(0xFF9E9E9E),
   };
 
   Color _catColor(String cat) => _catColors[cat] ?? const Color(0xFF9E9E9E);
@@ -121,10 +121,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     double income = 0, expenses = 0, transferred = 0;
     for (final t in monthTxs) {
       final a = (t['amount'] as num).toDouble();
-      final cat = t['category'] as String? ?? 'Otros';
+      final cat = t['category'] as String? ?? 'Others';
       if (a > 0) {
         income += a;
-      } else if (cat == 'Transferencias') {
+      } else if (cat == 'Transfers') {
         // Internal savings movements: track separately, don't count as expense
         transferred += a.abs();
       } else {
@@ -138,8 +138,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final catExpenses = <String, double>{};
     for (final t in monthTxs) {
       final a = (t['amount'] as num).toDouble();
-      final cat = t['category'] as String? ?? 'Otros';
-      if (a < 0 && cat != 'Transferencias') {
+      final cat = t['category'] as String? ?? 'Others';
+      if (a < 0 && cat != 'Transfers') {
         catExpenses[cat] = (catExpenses[cat] ?? 0) + a.abs();
       }
     }
@@ -153,10 +153,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       double inc = 0, exp = 0;
       for (final t in _txForMonth(bm)) {
         final a = (t['amount'] as num).toDouble();
-        final cat = t['category'] as String? ?? 'Otros';
+        final cat = t['category'] as String? ?? 'Others';
         if (a > 0) {
           inc += a;
-        } else if (cat != 'Transferencias') {
+        } else if (cat != 'Transfers') {
           exp += a.abs();
         }
       }

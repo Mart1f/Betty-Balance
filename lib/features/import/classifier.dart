@@ -1,25 +1,25 @@
 class Classifier {
   static const Map<String, List<String>> _rules = {
-    'Nómina': [
+    'Salary': [
       'payment from miss martha',
       'payment from caf ',
     ],
-    'Alquiler': [
+    'Rent': [
       'regie maisel',
       'uxco',
       'studapart',
     ],
-    'Universidad': [
+    'University': [
       'imt atlantique',
       'bde imt',
     ],
-    'Supermercado': [
+    'Groceries': [
       'lidl', 'carrefour', 'intermarch', 'magasin u', 'auchan',
       'casino superm', 'g20 superm', 'coccinelle', 'elam distri',
       'vival', 'action', 'franprix', 'monoprix', 'global supermar',
       'supermar', 'loja de conveni',
     ],
-    'Restaurantes': [
+    'Restaurants': [
       'deliveroo', 'uber eats', 'mcdonald', 'kfc', 'ramen', "o'tacos",
       'piment rouge', 'noakhali', 'tacos', 'burger king', 'le delice',
       'coppa', 'dicha', 'titi parisien', 'passy', 'croq dahu',
@@ -29,7 +29,7 @@ class Classifier {
       'da diffusion', 'wine bar', 'pastelar', 'conscious', 'joe',
       'anuska', 'mohammad harun',
     ],
-    'Transporte': [
+    'Transport': [
       'blablacar', 'sncf', 'flixbus', 'flix se',
       'île-de-france mobilit', 'ile-de-france mobilit',
       'ecovelo', 'voi', 'bolt', 'grand reims mobilites',
@@ -37,31 +37,31 @@ class Classifier {
       'estacion de autobus', 'metropolitano de lisboa',
       'wingo', 'star,', 'viacao', 'aeroporto', 'turo',
     ],
-    'Salud': [
+    'Health': [
       'pharma', 'pharm ', 'aqualys', 'pisc brequigny',
       'pisc bréquigny', 'selarl', 'basic-fit', "wash'in",
       'coiffure',
     ],
-    'Ocio': [
+    'Entertainment': [
       'blockchain', 'cs.money', 'bet365', 'pathé', 'avalanche night',
       'disneyland', 'euro disney', 'le five', 'mellow', 'killer',
       'photomaton', 'musée', 'château', 'resel',
     ],
-    'Viajes': [
+    'Travel': [
       'airbnb', 'hotelf1', 'yotel', 'hotel brasserie',
       'leonardo hotels', 'hotel f1', 'hotelf1', 'govoyages',
     ],
-    'Suscripciones': [
+    'Subscriptions': [
       'amazon prime', 'apple', 'openai', 'claude',
       'free mobile', 'bouygues telecom', 'association resel',
       'association des e', 'lydia solutions', 'rebuy',
       'cardif',
     ],
-    'Ropa': [
+    'Clothing': [
       'new yorker', 'ar coiffure', 'bestwerkkledin', 'lvan btq',
       'aliexpress', 'fnac',
     ],
-    'Transferencias': [
+    'Transfers': [
       "compte d'épargne", "compte d'epargne", 'épargne',
       // BNP PDFs often omit accents and apostrophes → catch all variants
       'epargne', 'livret', 'compte epargne',
@@ -73,16 +73,16 @@ class Classifier {
     final desc = description.toLowerCase();
     final t = type.toLowerCase();
 
-    if (t == 'interest') return 'Otros';
-    if (t == 'card refund') return 'Otros';
+    if (t == 'interest') return 'Others';
+    if (t == 'card refund') return 'Others';
 
     // Uber Eats before Uber to avoid partial match
-    if (desc.contains('uber eats')) return 'Restaurantes';
-    if (desc.contains('uber')) return 'Transporte';
+    if (desc.contains('uber eats')) return 'Restaurants';
+    if (desc.contains('uber')) return 'Transport';
 
     // Amazon Prime before Amazon
-    if (desc.contains('amazon prime')) return 'Suscripciones';
-    if (desc.contains('amazon')) return 'Otros';
+    if (desc.contains('amazon prime')) return 'Subscriptions';
+    if (desc.contains('amazon')) return 'Others';
 
     for (final entry in _rules.entries) {
       for (final keyword in entry.value) {
@@ -97,28 +97,28 @@ class Classifier {
     // Revolut:"Transfer to NAME"(normalized from "Transferencia a X")
     if (t == 'transfer' &&
         (desc.startsWith('to ') || desc.startsWith('transfer to '))) {
-      return 'Personas';
+      return 'People';
     }
 
     // Incoming person transfers
     // BNP:    "From NAME"         (from /DE extraction)
     // Revolut:"Transfer from NAME"(normalized from "Transferencia de X")
     if (t == 'transfer' && desc.startsWith('transfer from ')) {
-      return 'Personas';
+      return 'People';
     }
 
     // Incoming deposits from persons
     // BNP:    "From NAME"
     if (t == 'deposit' && desc.startsWith('from ')) {
-      return 'Personas';
+      return 'People';
     }
 
     // Revolut TOPUP from person: "Payment from NAME"
-    // (keyword loop already caught Nómina sources like CAF/MisMartha above)
+    // (keyword loop already caught salary sources like CAF/MisMartha above)
     if (t == 'topup' && desc.startsWith('payment from ')) {
-      return 'Personas';
+      return 'People';
     }
 
-    return 'Otros';
+    return 'Others';
   }
 }

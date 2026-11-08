@@ -36,20 +36,20 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final Set<String> _selectedCategories = {};
 
   static const Map<String, Color> _categoryColors = {
-    'Nómina': Color(0xFF8BC34A),
-    'Alquiler': Color(0xFFE65100),
-    'Universidad': Color(0xFF1A237E),
-    'Personas': Color(0xFF00695C),
-    'Supermercado': Color(0xFF4CAF50),
-    'Restaurantes': Color(0xFFFF9800),
-    'Transporte': Color(0xFF2196F3),
-    'Salud': Color(0xFFE91E63),
-    'Ocio': Color(0xFF9C27B0),
-    'Viajes': Color(0xFF00BCD4),
-    'Suscripciones': Color(0xFF607D8B),
-    'Ropa': Color(0xFFFF5722),
-    'Transferencias': Color(0xFF795548),
-    'Otros': Color(0xFF9E9E9E),
+    'Salary': Color(0xFF8BC34A),
+    'Rent': Color(0xFFE65100),
+    'University': Color(0xFF1A237E),
+    'People': Color(0xFF00695C),
+    'Groceries': Color(0xFF4CAF50),
+    'Restaurants': Color(0xFFFF9800),
+    'Transport': Color(0xFF2196F3),
+    'Health': Color(0xFFE91E63),
+    'Entertainment': Color(0xFF9C27B0),
+    'Travel': Color(0xFF00BCD4),
+    'Subscriptions': Color(0xFF607D8B),
+    'Clothing': Color(0xFFFF5722),
+    'Transfers': Color(0xFF795548),
+    'Others': Color(0xFF9E9E9E),
   };
 
   Color _catColor(String? cat) =>
@@ -100,7 +100,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       _transactions.fold(0.0, (s, t) => s + (t['amount'] as num).toDouble());
 
   Set<String> get _allCategories =>
-      _transactions.map((t) => t['category'] as String? ?? 'Otros').toSet();
+      _transactions.map((t) => t['category'] as String? ?? 'Others').toSet();
 
   List<Map<String, dynamic>> get _filtered {
     var list = _transactions;
@@ -429,7 +429,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget _buildTxRow(BuildContext context, Map<String, dynamic> t,
       NumberFormat fmt, DateFormat dateFmt) {
     final amount = (t['amount'] as num).toDouble();
-    final category = t['category'] as String? ?? 'Otros';
+    final category = t['category'] as String? ?? 'Others';
     final date = DateTime.parse(t['date'] as String);
     final catColor = _catColor(category);
     final cs = Theme.of(context).colorScheme;
