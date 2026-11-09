@@ -1,20 +1,24 @@
 # BettyBalance
 
-A personal finance app built with Flutter and Supabase.
+A personal finance app with on-device AI transaction classification, built with Flutter and Supabase.
 
 ## Why it exists
 
 It started from a concrete need: having one place to see all my expenses and income without relying on individual bank apps, which are limited, slow, and don't talk to each other. I have accounts at BNP (France), Revolut, and BBVA Colombia, in euros and Colombian pesos, and I wanted to see everything together, categorized and in a way that actually makes sense.
 
-Two technical interests shaped the approach: exploring Flutter as a tool for building apps that run on different devices without rewriting code, and connecting to a real, secure, open-source database that I actually control.
+Two technical interests shaped the approach: exploring Flutter as a tool for building apps that run on different devices without rewriting code, and connecting to a real, secure, open-source database that I actually control. A third thread emerged during development: building a local ML classification pipeline that runs entirely on-device using ONNX, trained on real transaction data.
 
 ## What it does
 
 **Import bank statements**
 Upload your bank statement (CSV for Revolut, PDF for BNP) and the app reads it, extracts every transaction, and saves it. No manual forms, no copying anything by hand.
 
-**Automatic classification**
-Each transaction is automatically sorted into categories like Groceries, Restaurants, Transport, Salary, or Travel, based on keywords in the transaction description. If a classification doesn't make sense, it can be adjusted.
+**AI-powered automatic classification**
+Every transaction is classified automatically the moment it's imported. The classification pipeline runs in two stages: a fast keyword layer handles obvious patterns (merchant names, known payees), and a machine learning model — trained on real transactions from this app — handles everything the keyword layer doesn't recognize with confidence.
+
+The ML model is a TF-IDF + Logistic Regression classifier exported to ONNX format. ONNX (Open Neural Network Exchange) is an open standard for packaging trained models so they can run anywhere, on any device, without needing Python or a server. In BettyBalance, the model runs entirely on-device via ONNX Runtime — no API calls, no cloud, no latency.
+
+The model was trained on 1,178 labeled transactions across 13 categories. Cross-validation on that dataset gives **86.8% accuracy (± 5.2%)**, meaning 9 out of 10 transactions are categorized correctly without any user input. The model can be retrained at any time as more transactions accumulate, and the ONNX file is replaced in the app bundle.
 
 **Unified view across all accounts**
 A single table with all movements from all banks, with filters by date, category, and bank. The total balance is always visible at the top.
