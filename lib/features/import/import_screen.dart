@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
@@ -61,7 +62,7 @@ class _ImportScreenState extends State<ImportScreen> {
       List<ParsedTransaction> parsed;
       String? rawDebug;
       if (isRevolutCsv) {
-        final content = String.fromCharCodes(bytes);
+        final content = utf8.decode(bytes, allowMalformed: true);
         parsed = RevolutParser.parse(content);
       } else {
         parsed = BnpParser.parse(bytes);
@@ -86,25 +87,63 @@ class _ImportScreenState extends State<ImportScreen> {
 
     try {
       final userId = _supabase.auth.currentUser!.id;
-      final rows = _transactions.map((t) => {
-        'user_id': userId,
-        'account_id': _selectedAccountId,
-        'date': t.date.toIso8601String().split('T').first,
-        'description': t.description,
-        'amount': t.amount,
-        'currency': t.currency,
-        'category': t.category,
-        'source_file': _selectedFileName,
+
+      // Fetch existing transactions for this account in the same date range
+      final allDates = _transactions
+          .map((t) => t.date.toIso8601String().split('T').first)
+          .toList();
+      final minDate = allDates.reduce((a, b) => a.compareTo(b) < 0 ? a : b);
+      final maxDate = allDates.reduce((a, b) => a.compareTo(b) > 0 ? a : b);
+
+      final existing = await _supabase
+          .from('transactions')
+          .select('date, description, amount')
+          .eq('account_id', _selectedAccountId!)
+          .gte('date', minDate)
+          .lte('date', maxDate)
+          .limit(10000);
+
+      // Fingerprint: "date|description|amount" (rounded to 2 decimals)
+      final existingKeys = <String>{};
+      for (final row in existing) {
+        final d = row['date'].toString().split('T').first;
+        final desc = row['description'].toString();
+        final amt = (row['amount'] as num).toStringAsFixed(2);
+        existingKeys.add('$d|$desc|$amt');
+      }
+
+      final newTxns = _transactions.where((t) {
+        final d = t.date.toIso8601String().split('T').first;
+        final key = '$d|${t.description}|${t.amount.toStringAsFixed(2)}';
+        return !existingKeys.contains(key);
       }).toList();
 
-      for (var i = 0; i < rows.length; i += 100) {
-        final batch = rows.sublist(i, (i + 100).clamp(0, rows.length));
-        await _supabase.from('transactions').insert(batch);
+      final skipped = _transactions.length - newTxns.length;
+
+      if (newTxns.isNotEmpty) {
+        final rows = newTxns.map((t) => {
+          'user_id': userId,
+          'account_id': _selectedAccountId,
+          'date': t.date.toIso8601String().split('T').first,
+          'description': t.description,
+          'amount': t.amount,
+          'currency': t.currency,
+          'category': t.category,
+          'source_file': _selectedFileName,
+        }).toList();
+
+        for (var i = 0; i < rows.length; i += 100) {
+          final batch = rows.sublist(i, (i + 100).clamp(0, rows.length));
+          await _supabase.from('transactions').insert(batch);
+        }
       }
 
       if (mounted) {
+        final msg = skipped > 0
+            ? '${newTxns.length} imported, $skipped already existed (skipped).'
+            : '${newTxns.length} transactions imported.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_transactions.length} transactions imported.')),
+          SnackBar(content: Text(msg)),
         );
         Navigator.of(context).pop(true);
       }

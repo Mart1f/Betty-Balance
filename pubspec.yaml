@@ -39,6 +39,7 @@ dependencies:
   csv: ^6.0.0
   syncfusion_flutter_pdf: ^26.1.38
   fl_chart: ^0.68.0
+  onnxruntime: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,7 @@ flutter:
 
   assets:
     - .env
+    - assets/model/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

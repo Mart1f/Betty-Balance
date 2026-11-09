@@ -324,8 +324,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: SizedBox(
+            height: 220,
+            child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: 180,
@@ -369,8 +371,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
               ),
               const SizedBox(width: 20),
-              // Legend — fixed columns so it doesn't stretch to screen edge
+              // Legend — scrollable so it never pushes content below
               Expanded(
+                child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: cats.map((e) {
@@ -417,8 +420,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     );
                   }).toList(),
                 ),
+                ),
               ),
             ],
+          ),
           ),
         ),
       ),

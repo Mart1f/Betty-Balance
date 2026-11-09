@@ -12,6 +12,17 @@ class BnpParser {
     'novembre': 11, 'decembre': 12, 'décembre': 12,
   };
 
+  // Fix UTF-8 characters mangled by the PDF extractor (Latin-1 misread as UTF-8)
+  static String _fixEncoding(String s) => s
+      .replaceAll('Ã©', 'é').replaceAll('Ã¨', 'è').replaceAll('Ãª', 'ê')
+      .replaceAll('Ã ', 'à').replaceAll('Ã¢', 'â')
+      .replaceAll('Ã®', 'î').replaceAll('Ã¯', 'ï')
+      .replaceAll('Ã´', 'ô').replaceAll('Ã»', 'û').replaceAll('Ã¹', 'ù')
+      .replaceAll('Ã§', 'ç').replaceAll('Ã‰', 'É').replaceAll('Ãˆ', 'È')
+      .replaceAll('ÃŠ', 'Ê').replaceAll('Ã€', 'À').replaceAll('Ã‚', 'Â')
+      .replaceAll('Ã\u008e', 'Î').replaceAll('Ã\u008e', 'Î')
+      .replaceAll('Ã®', 'î').replaceAll('ÃÎle', 'Île');
+
   // Normalize accents + non-breaking space for keyword matching
   static String _norm(String s) => s
       .replaceAll('é', 'e').replaceAll('è', 'e').replaceAll('ê', 'e')
@@ -37,7 +48,7 @@ class BnpParser {
         endPageIndex: i,
       );
       for (final line in lines) {
-        final t = line.text.trim();
+        final t = _fixEncoding(line.text.trim());
         if (t.isNotEmpty) buf.writeln(t);
       }
     }

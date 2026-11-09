@@ -26,11 +26,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
-  Win32Window::Size size(1280, 720);
+  Win32Window::Size size(1440, 900);
   if (!window.Create(L"betty_balance", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
+  // Start maximized
+  ::ShowWindow(::FindWindow(nullptr, L"betty_balance"), SW_SHOWMAXIMIZED);
 
   ::MSG msg;
   while (::GetMessage(&msg, nullptr, 0, 0)) {

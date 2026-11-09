@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_config.dart';
 import 'features/auth/login_screen.dart';
 import 'features/transactions/transactions_screen.dart';
+import 'features/import/ml_classifier.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,9 @@ Future<void> main() async {
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
   );
+
+  // Load ML model in background — classifier falls back to keywords if unavailable
+  MlClassifier.load();
 
   runApp(const BettyBalanceApp());
 }

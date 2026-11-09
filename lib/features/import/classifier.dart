@@ -1,8 +1,11 @@
+import 'ml_classifier.dart';
+
 class Classifier {
   static const Map<String, List<String>> _rules = {
     'Salary': [
       'payment from miss martha',
       'payment from caf ',
+      'taack',
     ],
     'Rent': [
       'regie maisel',
@@ -32,6 +35,9 @@ class Classifier {
     'Transport': [
       'blablacar', 'sncf', 'flixbus', 'flix se',
       'île-de-france mobilit', 'ile-de-france mobilit',
+      'ile de france mobilit', 'idf mobilit',
+      'île-de-france mobilit', 'mobilitã',
+      'navigo', 'pass navigo', 'service navigo',
       'ecovelo', 'voi', 'bolt', 'grand reims mobilites',
       'bibus', 'deutsche bahn', 'metro de lisboa', 'reg brest',
       'estacion de autobus', 'metropolitano de lisboa',
@@ -52,7 +58,7 @@ class Classifier {
       'leonardo hotels', 'hotel f1', 'hotelf1', 'govoyages',
     ],
     'Subscriptions': [
-      'amazon prime', 'apple', 'openai', 'claude',
+      'amazon prime', 'apple', 'openai', 'claude', 'anthropic',
       'free mobile', 'bouygues telecom', 'association resel',
       'association des e', 'lydia solutions', 'rebuy',
       'cardif',
@@ -62,9 +68,8 @@ class Classifier {
       'aliexpress', 'fnac',
     ],
     'Transfers': [
-      "compte d'épargne", "compte d'epargne", 'épargne',
-      // BNP PDFs often omit accents and apostrophes → catch all variants
-      'epargne', 'livret', 'compte epargne',
+      "compte d'épargne", "compte d'epargne", "compte d’épargne", "compte d’epargne",
+      'épargne', 'epargne', 'livret', 'compte epargne',
       'bermudez romero', 'bermudez martin',
     ],
   };
@@ -76,11 +81,9 @@ class Classifier {
     if (t == 'interest') return 'Others';
     if (t == 'card refund') return 'Others';
 
-    // Uber Eats before Uber to avoid partial match
-    if (desc.contains('uber eats')) return 'Restaurants';
+    if (desc.contains('uber eats') || desc.contains('uber *eats')) return 'Restaurants';
     if (desc.contains('uber')) return 'Transport';
 
-    // Amazon Prime before Amazon
     if (desc.contains('amazon prime')) return 'Subscriptions';
     if (desc.contains('amazon')) return 'Others';
 
@@ -92,33 +95,23 @@ class Classifier {
       }
     }
 
-    // Outgoing person transfers
-    // BNP:    "To NAME"         (from /BEN extraction)
-    // Revolut:"Transfer to NAME"(normalized from "Transferencia a X")
     if (t == 'transfer' &&
         (desc.startsWith('to ') || desc.startsWith('transfer to '))) {
       return 'People';
     }
 
-    // Incoming person transfers
-    // BNP:    "From NAME"         (from /DE extraction)
-    // Revolut:"Transfer from NAME"(normalized from "Transferencia de X")
     if (t == 'transfer' && desc.startsWith('transfer from ')) {
       return 'People';
     }
 
-    // Incoming deposits from persons
-    // BNP:    "From NAME"
     if (t == 'deposit' && desc.startsWith('from ')) {
       return 'People';
     }
 
-    // Revolut TOPUP from person: "Payment from NAME"
-    // (keyword loop already caught salary sources like CAF/MisMartha above)
-    if (t == 'topup' && desc.startsWith('payment from ')) {
+    if ((t == 'topup' || t == 'transfer') && desc.startsWith('payment from ')) {
       return 'People';
     }
 
-    return 'Others';
+    return MlClassifier.predict(description) ?? 'Others';
   }
 }
